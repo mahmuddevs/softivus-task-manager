@@ -1,12 +1,24 @@
 "use client"
 
 import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { addTask, FormData } from "@/actions/tasks"
+import { notFound, useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import {
+  addTask,
+  FormData,
+  getSingleTask,
+  Task,
+  updateTask,
+} from "@/actions/tasks"
 import Swal from "sweetalert2"
+import dayjs from "dayjs"
 
-export default function AddTask() {
+export default function EditTask() {
+  const { id } = useParams()
+  const taskId = id!.toString()
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -14,14 +26,30 @@ export default function AddTask() {
     reset,
   } = useForm<FormData>()
 
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    if (!taskId) return
+
+    const fetchTask = async () => {
+      const task = await getSingleTask(taskId)
+      if (!task) {
+        router.replace("/not-found")
+      } else {
+        reset({
+          ...task,
+          dueDate: dayjs(task.dueDate).format("YYYY-MM-DD"),
+          status: task.status.toLowerCase() ?? "",
+        })
+      }
+    }
+
+    fetchTask()
+  }, [taskId, reset, router])
 
   const onSubmit = async (data: FormData) => {
     setLoading(true)
 
     try {
-      const { success, message } = await addTask(data)
+      const { success, message } = await updateTask(taskId, data)
       if (!success) {
         Swal.fire({
           position: "top-end",
@@ -97,7 +125,7 @@ export default function AddTask() {
             >
               <option value="">Select status</option>
               <option value="failed">Failed</option>
-              <option value="inprogress">In Progress</option>
+              <option value="inprogress">In progress</option>
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </select>
@@ -130,7 +158,7 @@ export default function AddTask() {
               }`}
               type="submit"
             >
-              {loading ? "Adding..." : "Add Task"}
+              {loading ? "Updating..." : "Update Task"}
             </button>
           </div>
         </form>

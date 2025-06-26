@@ -1,6 +1,6 @@
 "use server"
 
-export type TaskStatus = "pending" | "completed"
+export type TaskStatus = "pending" | "completed" | "inprogress" | "failed"
 
 export interface Task {
   id: string
@@ -71,4 +71,26 @@ export const addTask = async (taskData: FormData) => {
   }
 
   return { success: true, message: "Task added Successfully" }
+}
+
+export const updateTask = async (id: string, taskData: FormData) => {
+  if (!taskData || !id) {
+    return { success: false, message: "No Data Received" }
+  }
+  const response = await fetch(
+    `https://685bbc9189952852c2dac199.mockapi.io/api/v1/tasks/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(taskData),
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error("Failed to update task")
+  }
+
+  return { success: true, message: "Task updated Successfully" }
 }
