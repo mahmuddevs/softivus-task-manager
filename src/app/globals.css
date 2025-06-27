@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-@plugin "daisyui" {
-  themes: light --default;
-}
+@plugin "daisyui";
 
 .global-container {
   @apply w-full px-4 sm:container md:px-6 lg:px-8 xl:w-8/12 mx-auto;
@@ -15,4 +13,8 @@
 
 .global-padding {
   @apply py-12 md:py-24
+}
+
+.menu .active {
+  @apply !bg-neutral text-white
 }

@@ -1,17 +1,12 @@
 "use client"
 
 import { useForm } from "react-hook-form"
-import { notFound, useParams, useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import {
-  addTask,
-  FormData,
-  getSingleTask,
-  Task,
-  updateTask,
-} from "@/actions/tasks"
+import { FormData, getSingleTask, updateTask } from "@/actions/tasks"
 import Swal from "sweetalert2"
 import dayjs from "dayjs"
+import Loading from "@/app/(dashboard)/loading"
 
 export default function EditTask() {
   const { id } = useParams()
@@ -30,14 +25,15 @@ export default function EditTask() {
     if (!taskId) return
 
     const fetchTask = async () => {
-      const task = await getSingleTask(taskId)
-      if (!task) {
+      const { success, task } = await getSingleTask(taskId)
+
+      if (!success) {
         router.replace("/not-found")
       } else {
         reset({
           ...task,
           dueDate: dayjs(task.dueDate).format("YYYY-MM-DD"),
-          status: task.status.toLowerCase() ?? "",
+          status: task.status?.toLowerCase() ?? "",
         })
       }
     }
@@ -72,6 +68,10 @@ export default function EditTask() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (loading) {
+    return <Loading />
   }
 
   return (
@@ -125,7 +125,6 @@ export default function EditTask() {
             >
               <option value="">Select status</option>
               <option value="failed">Failed</option>
-              <option value="inprogress">In progress</option>
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </select>

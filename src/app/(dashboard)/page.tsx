@@ -1,31 +1,84 @@
 "use client"
 
-import { getAllTasks, Task } from "@/actions/tasks"
+import {
+  deleteTask,
+  getAllTasks,
+  getCompletedTasks,
+  Task,
+} from "@/actions/tasks"
 import TaskCard from "@/components/Task"
+import { Clipboard } from "lucide-react"
 import { useEffect, useState } from "react"
+import Swal from "sweetalert2"
 
 export default function Dashboard() {
   const [status, setStatus] = useState<string>("")
   const [tasks, setTasks] = useState<Task[]>([])
+  const [completed, setCompleted] = useState<number>(0)
+
+  const fetchTasks = async () => {
+    const data = await getAllTasks(status)
+    const completed = await getCompletedTasks()
+    setTasks(data)
+    setCompleted(completed)
+  }
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const data = await getAllTasks(status)
-      setTasks(data)
-    }
-
     fetchTasks()
   }, [status])
 
-  const handleDelete = () => {
-    console.log("working")
+  const handleDelete = async (id: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const { success, message } = await deleteTask(id)
+
+          if (!success) {
+            Swal.fire({
+              position: "top-end",
+              icon: "error",
+              title: message,
+              showConfirmButton: false,
+              timer: 1500,
+            })
+            return
+          }
+
+          Swal.fire({
+            title: "Deleted!",
+            text: message,
+            icon: "success",
+          })
+
+          fetchTasks()
+        } catch (error) {
+          Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: "Something went wrong",
+            showConfirmButton: false,
+            timer: 1500,
+          })
+        }
+      }
+    })
   }
 
   return (
-    <section className="global-container global-margin">
-      <h1 className="text-3xl font-bold mb-6">📋 Task Dashboard</h1>
+    <section className="">
+      <h1 className="text-xl md:text-3xl font-bold mb-6 flex gap-2 items-center">
+        <Clipboard /> Task Dashboard
+        {` (${completed} Done / ${tasks.length} Total)`}
+      </h1>
 
-      {/* Filter bar */}
       <div className="mb-6 flex gap-2">
         <button
           className="btn btn-outline btn-sm"
@@ -53,10 +106,11 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Task list */}
       <div className="grid md:grid-cols-2 gap-4">
         {tasks.length > 0 ? (
-          tasks.map((task) => <TaskCard key={task.id} task={task} />)
+          tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onDelete={handleDelete} />
+          ))
         ) : (
           <div className="text-center text-gray-500">No tasks found.</div>
         )}

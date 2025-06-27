@@ -1,6 +1,6 @@
 "use server"
 
-export type TaskStatus = "pending" | "completed" | "inprogress" | "failed"
+export type TaskStatus = "pending" | "completed" | "failed"
 
 export interface Task {
   id: string
@@ -39,6 +39,9 @@ export const getAllTasks = async (status?: string) => {
 }
 
 export const getSingleTask = async (id: string) => {
+  if (!id) {
+    return { success: false, message: "No ID received" }
+  }
   const res = await fetch(
     `https://685bbc9189952852c2dac199.mockapi.io/api/v1/tasks/${id}`,
     {
@@ -47,8 +50,13 @@ export const getSingleTask = async (id: string) => {
     }
   )
 
-  if (!res.ok) throw new Error("Failed to fetch tasks")
-  return await res.json()
+  if (!res.ok) {
+    return { success: false, message: "Faild Fetching Task" }
+  }
+
+  const task = await res.json()
+
+  return { success: true, message: "Fetched Task", task }
 }
 
 export const addTask = async (taskData: FormData) => {
@@ -93,4 +101,39 @@ export const updateTask = async (id: string, taskData: FormData) => {
   }
 
   return { success: true, message: "Task updated Successfully" }
+}
+
+export const deleteTask = async (id: string) => {
+  if (!id) {
+    return { success: false, message: "No ID received" }
+  }
+  const res = await fetch(
+    `https://685bbc9189952852c2dac199.mockapi.io/api/v1/tasks/${id}`,
+    {
+      method: "DELETE",
+    }
+  )
+
+  if (!res.ok) {
+    return { success: false, message: "Unable to delete task" }
+  }
+  return { success: true, message: "Task Deleted Successfully" }
+}
+
+export const getCompletedTasks = async () => {
+  const res = await fetch(
+    "https://685bbc9189952852c2dac199.mockapi.io/api/v1/tasks",
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  )
+
+  if (!res.ok) throw new Error("Failed to fetch tasks")
+
+  const tasks: Task[] = await res.json()
+
+  const completedTasks = tasks.filter((task) => task.status === "completed")
+
+  return completedTasks.length
 }
