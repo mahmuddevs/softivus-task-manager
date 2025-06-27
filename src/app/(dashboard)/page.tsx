@@ -25,7 +25,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchTasks()
-  }, [status])
+  }, [status, fetchTasks])
 
   const handleDelete = async (id: string) => {
     Swal.fire({
@@ -60,10 +60,12 @@ export default function Dashboard() {
 
           fetchTasks()
         } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Something went wrong"
           Swal.fire({
             position: "top-end",
             icon: "error",
-            title: "Something went wrong",
+            title: `${message}`,
             showConfirmButton: false,
             timer: 1500,
           })
