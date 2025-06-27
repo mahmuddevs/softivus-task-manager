@@ -10,11 +10,13 @@ import TaskCard from "@/components/Task"
 import { Clipboard } from "lucide-react"
 import { useEffect, useState } from "react"
 import Swal from "sweetalert2"
+import Loading from "./loading"
 
 export default function Dashboard() {
   const [status, setStatus] = useState<string>("")
   const [tasks, setTasks] = useState<Task[]>([])
   const [completed, setCompleted] = useState<number>(0)
+  const [taskLoading, setTaskLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -22,6 +24,7 @@ export default function Dashboard() {
       const completed = await getCompletedTasks()
       setTasks(data)
       setCompleted(completed)
+      setTaskLoading(false)
     }
     fetchTasks()
   }, [status])
@@ -73,12 +76,18 @@ export default function Dashboard() {
     })
   }
 
+  if (taskLoading) {
+    return <Loading />
+  }
+
   return (
-    <section className="">
-      <h1 className="text-xl md:text-3xl font-bold mb-6 flex gap-2 items-center">
-        <Clipboard /> Task Dashboard
-        {` (${completed} Done / ${tasks.length} Total)`}
-      </h1>
+    <section>
+      <div className="mb-6">
+        <h1 className="text-xl md:text-3xl font-bold flex gap-2 items-center">
+          <Clipboard /> Task Dashboard
+        </h1>
+        <p className="text-xl font-bold">{`(${completed} Done / ${tasks.length} Total)`}</p>
+      </div>
 
       <div className="mb-6 flex gap-2">
         <button

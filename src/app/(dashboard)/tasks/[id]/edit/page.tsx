@@ -12,6 +12,7 @@ export default function EditTask() {
   const { id } = useParams()
   const taskId = id!.toString()
   const router = useRouter()
+  const [taskLoading, setTaskLoading] = useState(true)
   const [loading, setLoading] = useState(false)
 
   const {
@@ -36,6 +37,7 @@ export default function EditTask() {
           status: task.status?.toLowerCase() ?? "",
         })
       }
+      setTaskLoading(false)
     }
 
     fetchTask()
@@ -70,7 +72,7 @@ export default function EditTask() {
     }
   }
 
-  if (loading) {
+  if (taskLoading) {
     return <Loading />
   }
 

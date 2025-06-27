@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @plugin "daisyui";
 
 .global-container {
@@ -16,5 +16,5 @@
 }
 
 .menu .active {
-  @apply !bg-neutral text-white
+  @apply bg-neutral dark:bg-info text-white
 }
