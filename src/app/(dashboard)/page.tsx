@@ -16,16 +16,15 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [completed, setCompleted] = useState<number>(0)
 
-  const fetchTasks = async () => {
-    const data = await getAllTasks(status)
-    const completed = await getCompletedTasks()
-    setTasks(data)
-    setCompleted(completed)
-  }
-
   useEffect(() => {
+    const fetchTasks = async () => {
+      const data = await getAllTasks(status)
+      const completed = await getCompletedTasks()
+      setTasks(data)
+      setCompleted(completed)
+    }
     fetchTasks()
-  }, [status, fetchTasks])
+  }, [status])
 
   const handleDelete = async (id: string) => {
     Swal.fire({
@@ -57,8 +56,8 @@ export default function Dashboard() {
             text: message,
             icon: "success",
           })
-
-          fetchTasks()
+          const updated = tasks.filter((task) => task.id !== id)
+          setTasks(updated)
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Something went wrong"

@@ -1,5 +1,3 @@
-// app/(dashboard)/tasks/[id]/page.tsx
-
 import { getSingleTask } from "@/actions/tasks"
 import { formatDate } from "@/utils/dateFormatter"
 import { notFound } from "next/navigation"
